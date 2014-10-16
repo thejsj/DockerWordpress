@@ -3,15 +3,14 @@ MAINTAINER Co+Lab Multimedia
 
 # Install packages
 RUN apt-get update
-RUN apt-get -yq install mysql-client wget nano 
-# I like emacs, you can use whatever...
-RUN apt-get install -yq emacs
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get -yq install mysql-client wget nano
 
 # Make nano work (http://www.absolutelytech.com/2010/10/11/solved-term-environment-variable-not-set-in-guake/)
 RUN echo -e "TERM=xterm\nexport TERM" >> ~/.bashrc && kill -9 $$
 
-# Add permalink feature
+RUN rm -rf /var/lib/apt/lists/*
+
+# Add Permalinks
 RUN a2enmod rewrite
 ADD wordpress.conf /etc/apache2/sites-enabled/000-default.conf
 
@@ -27,9 +26,7 @@ ADD wordpress/wp-config.php /app/wp/
 ADD wordpress/index.php /app/
 ADD wordpress/.htaccess /app/
 RUN chmod 644 /app/.htaccess
-RUN rm -rf /app/wp/wp-content
-# This seems ghetto... 
-RUN mv /app/wp-content /app/wp/
+ADD cork-gulp /app/wp/wp-content
 
 EXPOSE 80
 # VOLUME ["/app/wp/wp-content"]
