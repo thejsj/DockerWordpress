@@ -62,6 +62,12 @@ define('NONCE_SALT',       'z6G5thFC]JIW]|ZQIBgZ?zBb^!N#3-Un=)`!Xb/,Yd8[2&}.W{IT
 $table_prefix  = 'wp_';
 
 /**
+ * Set url based on request for dev purposes
+ */
+define( 'WP_SITEURL', 'http://' . $_SERVER['HTTP_HOST'] . '/wp' );
+define( 'WP_HOME', 'http://' . $_SERVER['HTTP_HOST'] );
+
+/**
  * WordPress Localized Language, defaults to English.
  *
  * Change this to localize WordPress. A corresponding MO file for the chosen

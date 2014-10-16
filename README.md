@@ -205,3 +205,22 @@ boot2docker ip
 ```
 
 4. Test it by going to `http://dockerhost`
+
+## Assumptions
+
+1. I'm assuming you're running a MySQL server in your Mac, not in your VM. This obviously need to change in order to be flexible. 
+2. I'm assuming you're using guest volumes for your `wp-content` folder, which is where your theme, uploads and plugins will be installed.
+
+## Questions
+
+1. What would be the best way to standardize this in order to make the transition to production easier? 
+2. How will our database setup look in a production environment?
+3. The `wp-content` would behave very differently from development to production (no guest volumes), what's the best way to handle this?
+4. Should we have 1 Dockerfile for all projects or 1 Dockerfile per project. The second one seems better.
+
+## Ideas 
+
+1. Integrating npm, gulp, and compass into the container for front-end workflow
+2. Setting up WP through the WP-CLI
+3. Adding composer for plugin managment (plugins now trakced via git)
+4. Install Varnish out of the box, for production.
