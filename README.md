@@ -204,4 +204,4 @@ If you have `dockerhost` setup in your `/etc/hosts`, you can skip this
 boot2docker ip
 ```
 
-4. Test it by going to `http://localhost`
+4. Test it by going to `http://dockerhost`
