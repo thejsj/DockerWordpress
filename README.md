@@ -155,7 +155,17 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 3. Open it in your browser with  http://dockerhost:PORT_NUMBER
 
-Great, it works!
+Great, it works! Remmeber, that we setup `dockerhost` previously and added it to our `/etc/hosts`. If you didn't do that then run this command to get the IP address for the container: 
+
+```
+boot2docker ip
+```
+
+To get the port number, run this:
+
+```
+docker port web 80
+```
 
 4. Then kill it
 ```
@@ -165,14 +175,33 @@ docker rm web
 
 ## Running A Container
 
-1. Run the container
+1. Build the container
 
 ```
-docker run -d -P --name=TITLE_OF_YOUR_IMAGE NAME_OF_YOUR_IMAGE
+docker build -t IMAGE_TAG LOCATION_OF_IMAGE
 ```
 
-2. Get the Port
+Something like this
 
 ```
-docker port TITLE_OF_YOUR_IMAGE 80
+cd ~/ && git@github.com:thejsj/DockerWordpress.git
+docker build -t wp ~/DockerWordpress
 ```
+
+2. Run the container
+
+Once the container is built, run it.
+
+```
+docker -d -p 80:80 --name wp wp
+```
+
+3. Get the IP Address for your boot2docker vm:
+
+If you have `dockerhost` setup in your `/etc/hosts`, you can skip this
+
+```
+boot2docker ip
+```
+
+4. Test it by going to `http://localhost`
