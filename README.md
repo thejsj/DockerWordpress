@@ -1,91 +1,178 @@
-tutum-docker-wordpress-nosql
-============================
+# WordPress and Docker in MacOS
 
+Docker image setup for WordPress. Based on [Tutum's WordPress No SQL image](https://github.com/tutumcloud/tutum-docker-wordpress-nosql).
 
-Out-of-the-box Wordpress docker image which can be linked to MySQL.
+## Setup
 
+We'll setup docker in your Mac along with boot2docker. We'll also add guest volumes to docker and ssh capabilities. boot2docker is a lightweight linux VM. It's basically the linux machine that will run Docker in your mac. Docker runs on linux! boot2docker is a lightweight alternative to something like Vagrant, which is another way of having a Linux VM inside your mac. 
 
-Usage (standalone)
-------------------
+Guest volumes allow you to share files between your mac and your Linux VM. After you are sharing files with your Linux VM, these can also be shared with your Docker image. In this WordPress image we'll use guest volumes to share the `wp-content` directory with our docker image (hence leaving it in our mac, for faster editing). 
 
-This image needs an external MySQL server or linked MySQL container. To create a MySQL container:
+We'll also use something called `nsenter` to be able to SSH into our Docker image. Once you're inside the docker image you can `apt-get install` more packages or move stuff around.
 
-    docker run -d -e MYSQL_PASS="<your_password>" --name db -p 3306:3306 tutum/mysql:5.5
+Based on this: http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide
 
-To run Wordpress by linking to the database created above:
+### Part 1: Setting Up Docker and boot2docker
 
-    docker run -d --link db:db -e DB_PASS="<your_password>" -p 80:80 tutum/wordpress-stackable
+1. Install docker and boot2docker
+```
+brew update
+brew install docker
+brew install boot2docker
+```
 
-Now, you can use your web browser to access Wordpress from the the follow address:
+2. Add Guest Additions, Initialize and start boot2docker
 
-    http://localhost/
+Add Guest Additions to boot2docker. This allows boot2docker to access your directory in your mac. Remember, Docker runs in a *Linux* virtual machine inside your mac (that's essentially what boot2docker is!), so it does not have access to your file system by default. 
 
-The installation wizard will appear.
+```
+curl http://static.dockerfiles.io/boot2docker-v1.2.0-virtualbox-guest-additions-v4.3.14.iso > ~/.boot2docker/boot2docker.iso
+VBoxManage sharedfolder add boot2docker-vm -name home -hostpath /Users
+```
 
+Then start up boot2docker.
 
-Usage (as a base image)
------------------------
+```
+boot2docker init
+boot2docker up
+```
 
-If you want to use it as a base image to create your customized version of wordpress, you can do so by creating a `Dockerfile` similar to the following:
+Your `up`, will output something like this:
 
-    FROM tutum/wordpress-stackable:latest
+```
+To connect the Docker client to the Docker daemon, please set:
+    export DOCKER_HOST=tcp://SOME_IP_ADRESS:SOME_PORT_NUMBER
+```
 
-    # Add an initial data which will be automatically loaded when creating the database for the first time
-    ADD initial_db.sql /initial_db.sql
+Go ahead and do that:
+```
+export DOCKER_HOST=tcp://SOME_IP_ADRESS:SOME_PORT_NUMBER
+```
 
-    # Add custom themes, plugins and/or uploads
-    ADD themes/ /app/wp-content/themes/
-    ADD plugins/ /app/wp-content/plugins/
-    ADD uploads/ /app/wp-content/uploads/
-    RUN chown www-data:www-data /app/wp-content -R
+3. See if it all worked:
 
+```
+> docker info
+Containers: 0
+Images: 0
+Storage Driver: aufs
+ Root Dir: /mnt/sda1/var/lib/docker/aufs
+ Dirs: 0
+Execution Driver: native-0.2
+Kernel Version: 3.15.3-tinycore64
+Debug mode (server): true
+Debug mode (client): false
+Fds: 10
+Goroutines: 10
+EventsListeners: 0
+Init Path: /usr/local/bin/docker
+Sockets: [unix:///var/run/docker.sock tcp://0.0.0.0:2375]
+```
 
-Usage (using fig)
------------------
+4. Add this to your bash profile and re-run your `~/.bash_profile`
 
-To launch wordpress using `fig`, simply execute the following command:
+```
+docker-ip() {
+  boot2docker ip 2> /dev/null
+}
+```
 
-    fig up -d
+5. Add Docker's VM's IP address to your hosts file 
 
-The first time that you run this command, a new MySQL container will be created, which will then be linked to the Wordpress container automatically. You can start using Wordpress from your browser at `http://localhost/`
+This will make it possible to go to http://dockerhost:PORT_NUMBER
 
+```
+echo $(docker-ip) dockerhost | sudo tee -a /etc/hosts
+```
 
-Configuration (using fig)
--------------------------
+The IP address part can become a little tricky, because IP addresses can change over time if you are using multiple VMs (which we do a lot of at CO+LAB). If something is not working, this is a good place to start debugging.
 
-Edit `fig.yml` to customize the wordpress service before running `fig up`:
+6. Install `nsenter` to SSH into your Docker image
 
-The default `fig.yml` shows as follow:
+First, ssh into your boot2docker VM
 
-    wordpress:
-      build: .
-      links:
-       - db
-      ports:
-       - "80:80"
-      environment:
-        DB_NAME: wordpress
-        DB_USER: admin
-        DB_PASS: "**ChangeMe**"
-        DB_HOST: "**LinkMe**"
-        DB_PORT: "**LinkMe**"
-    db:
-      image: tutum/mysql:5.5
-      environment:
-        MYSQL_PASS: "**ChangeMe**"
-	
-- Change the ports `"80:80"` to map to a different port number: e.g. `"8080:80"` will run wordpress at port `8080`.
+```
+boot2docker ssh
+```
 
-- Change the value of `DB_NAME`, `DB_PASS` credentials (name, password) to connect to MySQL. Value of `DB_USER` must be `admin` at this moment.
+Now, inside your boot2docker VM, install `nsenter`
 
-- Modify password of admin user in MySQL container by changing the value of `MYSQL_PASS`, must be the same value of `DB_PASS`.
+```
+docker run --rm -v /var/lib/boot2docker:/target jpetazzo/nsenter
+```
 
-- To use a MariaDB instead of MySQL, you can make the following changes to the `fig.yml` file:
+Once that's done, add `/var/lib/boot2docker` to the PATH: 
 
-        db:
-          image: tutum/mariadb:latest
-          environment:
-            MARIADB_PASS: randpass
+```
+echo 'export PATH=/var/lib/boot2docker:$PATH' >> ~/.profile
+source ~/.profile
+```
 
-    And then, change `DB_PASS` to the same value as `MARIADB_PASS`.
+After that, go back to your Mac (`exit`) and add this script somewhere:
 
+```
+#!/bin/bash
+set -e
+ 
+# Check for nsenter. If not found, install it
+boot2docker ssh '[ -f /var/lib/boot2docker/nsenter ] || docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter'
+ 
+# Use bash if no command is specified
+args=$@
+if [[ $# = 1 ]]; then
+  args+=(/bin/bash)
+fi
+ 
+boot2docker ssh -t sudo /var/lib/boot2docker/docker-enter "${args[@]}"
+```
+
+You can add it to `~/docker-enter.sh`, then `chmod +x` it, and then try to ssh into it. 
+
+```
+docker run -d -P --name web nginx # Create an instance of Docker
+~/docker-enter.sh web
+```
+
+This part is kind of tricky, so if that doesn't work go refer to the [Viget article](http://viget.com/extend/how-to-use-docker-on-os-x-the-missing-guide).
+
+#### Testing That It Works (Optional)
+
+To quickly test if this works, you can setup a quick nginx container that will server a simple static html page. 
+
+1. Start a container running nginx
+
+```
+docker run -d -P --name web nginx
+```
+
+2. Check that it's running
+
+```
+> docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                   NAMES
+0092c03e1eba        nginx:latest        nginx               44 seconds ago      Up 41 seconds       0.0.0.0:49153->80/tcp   web
+```
+
+3. Open it in your browser with  http://dockerhost:PORT_NUMBER
+
+Great, it works!
+
+4. Then kill it
+```
+docker stop web
+docker rm web
+```
+
+## Running A Container
+
+1. Run the container
+
+```
+docker run -d -P --name=TITLE_OF_YOUR_IMAGE NAME_OF_YOUR_IMAGE
+```
+
+2. Get the Port
+
+```
+docker port TITLE_OF_YOUR_IMAGE 80
+```
