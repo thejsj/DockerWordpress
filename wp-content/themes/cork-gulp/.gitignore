@@ -1,0 +1,15 @@
+*.orig
+*.DS_Store
+
+.sass-cache/*
+
+# Ignore Node Modules
+node_modules/*
+bower_components/*
+dist
+dist/*
+dist/**/*
+
+**/*.psd
+
+**/*.tar.gz

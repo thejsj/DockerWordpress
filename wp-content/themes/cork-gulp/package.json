@@ -1,0 +1,44 @@
+{
+  "name": "gulp",
+  "version": "0.0.1",
+  "description": "Custom Wordpress theme developed off of the Cork development starter theme.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ScarbroughStudios/Cork"
+  },
+  "main": "app/js/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Scarbrough Studios",
+  "devDependencies": {
+    "gulp": "^3.6.2",
+    "gulp-uglify": "^0.3.0",
+    "gulp-livereload": "^1.5.0",
+    "gulp-compass": "^1.1.9",
+    "browserify-shim": "~3.5",
+    "gulp-browserify": "^0.5.0",
+    "gulp-changed": "^0.3.0",
+    "gulp-notify": "~1.2.4"
+  },
+  "dependencies": {
+    "browsernizr": "https://github.com/thejsj/browsernizr/tarball/master",
+    "fastclick": "^1.0.1",
+    "jquery": "https://github.com/jquery/jquery/archive/1.11.1.tar.gz",
+    "jRespond": "https://github.com/thejsj/jRespond/tarball/master",
+    "mustache": "~0.8.1"
+  },
+  "browser": {
+    "GSAP": "./app/js/vendor/GreenSock-JS-1.12.1/src/minified/TweenMax.min.js"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "GSAP": {
+      "exports": "GSAP"
+    }
+  }
+}

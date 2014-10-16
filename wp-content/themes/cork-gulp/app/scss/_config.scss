@@ -1,0 +1,74 @@
+/* Theme Variables & Mixins */
+
+/* Variables
+---------------------------------------------------------------------- */
+// Theme Colors
+$black: #000000;
+$white: #ffffff;
+
+/* Mixins (Sorted by ALPHA)
+---------------------------------------------------------------------- */
+// Media Queries
+$no-mq-support: false !default;
+$no-mq-threshold: 1200px;
+@mixin mediaQuery($width: 0, $height: false) {
+    @if $no-mq-support{
+        @if $width < $no-mq-threshold{
+            @content;
+        }
+    } @else {
+        @if $height {
+            @media ( min-width: + $width ) and ( min-height: + $height ) {
+                @content;
+            }
+        }@else{
+            @media ( min-width: + $width ) {
+                @content;
+            }
+        }
+    }
+}
+
+// Positioning
+@mixin position ($position: relative, $coordinates: 0 0 0 0) {
+
+	@if type-of($position) == list {
+		$coordinates: $position;
+		$position: relative;
+	}
+
+	$top: nth($coordinates, 1);
+	$right: nth($coordinates, 2);
+	$bottom: nth($coordinates, 3);
+	$left: nth($coordinates, 4);
+
+	position: $position;
+
+	@if $top == auto {
+		top: $top;
+	}
+	@else if not(unitless($top)) {
+		top: $top;
+	}
+
+	@if $right == auto {
+		right: $right;
+	}
+	@else if not(unitless($right)) {
+		right: $right;
+	}
+
+	@if $bottom == auto {
+		bottom: $bottom;
+	}
+	@else if not(unitless($bottom)) {
+		bottom: $bottom;
+	}
+
+	@if $left == auto {
+		left: $left;
+	}
+	@else if not(unitless($left)) {
+		left: $left;
+	}
+}

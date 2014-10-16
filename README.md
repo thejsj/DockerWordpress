@@ -206,6 +206,14 @@ boot2docker ip
 
 4. Test it by going to `http://dockerhost`
 
+5. If you're developing a site and want to edit files on your mac, you have to pass your directory as a volume: 
+
+```
+docker run -d -p 80:80 -v /Users/jorgesilvajetter/Desktop/wordpress-docker/wp-content:/app/wp/wp-content --name wp wp
+```
+
+Basically this shares our directory `/Users/jorgesilvajetter/Desktop/wordpress-docker/wp-content` with our docker container in `/app/wp/wp-content`. When we ssh into `/app/wp/wp-content` we find the contents of  `/Users/jorgesilvajetter/Desktop/wordpress-docker/wp-content`.
+
 ## Assumptions
 
 1. I'm assuming you're running a MySQL server in your Mac, not in your VM. This obviously need to change in order to be flexible. 
@@ -217,6 +225,7 @@ boot2docker ip
 2. How will our database setup look in a production environment?
 3. The `wp-content` would behave very differently from development to production (no guest volumes), what's the best way to handle this?
 4. Should we have 1 Dockerfile for all projects or 1 Dockerfile per project. The second one seems better.
+5. What exactly does the `VOLUME` attribute do?
 
 ## Ideas 
 

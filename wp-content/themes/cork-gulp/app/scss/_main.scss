@@ -1,0 +1,10 @@
+// Initialize Compass
+@import "compass";
+@import "compass/reset";
+@import "compass/css3";
+
+// Set variables and mixins
+@import "config";
+
+// Custom stylesheets
+@import "global";

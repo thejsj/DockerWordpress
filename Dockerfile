@@ -27,6 +27,9 @@ ADD wordpress/wp-config.php /app/wp/
 ADD wordpress/index.php /app/
 ADD wordpress/.htaccess /app/
 RUN chmod 644 /app/.htaccess
+RUN rm -rf /app/wp/wp-content
+# This seems ghetto... 
+RUN mv /app/wp-content /app/wp/
 
 EXPOSE 80
-VOLUME ["/app/wp/wp-content"]
+# VOLUME ["/app/wp/wp-content"]
