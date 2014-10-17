@@ -1,24 +1,55 @@
-FROM tutum/apache-php:latest
+FROM ubuntu:trusty
 MAINTAINER Co+Lab Multimedia
 
 #
-# Install packages
+# Install packages (apache-php has already updated)
 #
+
+# Install base packages
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 
-## MySQL
-RUN apt-get -yq install mysql-client wget
+# ESSENTIALS
+RUN apt-get -yq install curl git software-properties-common wget
+
+# APACHE
+RUN apt-get -yq install apache2
+        
+# PHP 
+RUN apt-get -yq install libapache2-mod-php5 php5-mysql php5-gd php5-curl php-pear php-apc
+
+# Ruby
+RUN apt-get -yq install ruby2.0 ruby2.0-dev bundler
+
+# Node JS
+RUN add-apt-repository ppa:chris-lea/node.js && apt-get update
+RUN apt-get -yq install nodejs
+
+# MySQL
+RUN apt-get -yq install mysql-client 
+
+# Compass
+RUN gem install rubygems-update
+RUN update_rubygems
+RUN gem install bundler --pre
+RUN gem install sass compass
+
+# NPM
+RUN npm install -g gulp
+
+# Configure PHP
+RUN sed -i "s/variables_order.*/variables_order = \"EGPCS\"/g" /etc/php5/apache2/php.ini
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Remove Source Lists
+RUN rm -rf /var/lib/apt/lists/*
 
 #
 # WordPress
 #
 
-## Add Permalinks
-RUN a2enmod rewrite
-ADD wordpress.conf /etc/apache2/sites-enabled/000-default.conf
-
 ## Download latest version of WordPress into /app
-RUN rm -fr /app
+RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 
 ## Install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -36,6 +67,18 @@ RUN echo "define( 'WP_SITEURL', 'http://' . \$_SERVER['HTTP_HOST'] . '/wp' ); " 
 RUN echo "define( 'WP_HOME', 'http://' . \$_SERVER['HTTP_HOST'] );" >> /app/wp/wp-config.php
 RUN if ! $(wp core is-installed --allow-root); then wp core install --allow-root --title='Some Title' --admin_user='admin' --admin_password='admin' --admin_email='jorge.silva@thejsj.com' --url='dockerhost' ; fi
 
+## Install & Activate Plugins
+WORKDIR /app/wp
+RUN wp plugin install advanced-custom-fields --activate --allow-root
+RUN wp plugin install regenerate-thumbnails --activate --allow-root
+RUN wp plugin install wp-migrate-db --activate --allow-root
+RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-gallery.zip --activate --allow-root
+RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-options-page.zip --activate --allow-root
+RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-repeater.zip --activate --allow-root
+RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/gravityforms_1.8.9.12.zip --activate --allow-root
+RUN wp plugin uninstall hello --allow-root
+RUN wp plugin uninstall akismet --allow-root
+
 ## Add Files
 WORKDIR /
 ADD wordpress/index.php /app/
@@ -48,46 +91,26 @@ ADD cork-gulp /app/wp/wp-content/themes/cork-gulp
 WORKDIR /app/wp/wp-content/themes
 RUN wp theme activate cork-gulp --allow-root
 
-## Install & Activate Plugins
-WORKDIR /app/wp
-RUN wp plugin install advanced-custom-fields --activate --allow-root
-RUN wp plugin install regenerate-thumbnails --activate --allow-root
-RUN wp plugin install wp-migrate-db --activate --allow-root
-RUN wp plugin uninstall hello --allow-root
-RUN wp plugin uninstall akismet --allow-root
-# TODO: Install ACF Repater Field, ACF Options, Gravity forms through private online repo
-
-#
-# Install Front-end Stuff
-#
-
-## Stuff we need
-RUN apt-get -yq install python-software-properties python g++
-RUN apt-get -yq install git make software-properties-common
-
-# Ruby (doesn't work)
-RUN curl -sSL https://get.rvm.io | bash -s stable --autolibs=enabled --ruby=1.9.3
-RUN /usr/local/rvm/scripts/rvm
-RUN source /etc/profile.d/rvm.sh
-
-## Install Node.js
-RUN add-apt-repository ppa:chris-lea/node.js && apt-get update
-RUN apt-get -yq install nodejs
-
-## NPM
+# Install npm packages
 WORKDIR /app/wp/wp-content/themes/cork-gulp
-RUN npm install -g gulp
 RUN npm install
+RUN gulp build
 
-# ## Compass
-WORKDIR /app/wp/wp-content/themes/cork-gulp
-# RUN gem install rubygems-update
-# RUN update_rubygems
-# RUN gem install sass
-# RUN gem install compass
+#
+# Apache/PHP
+#
 
-# ## Compile
-# WORKDIR /app/wp/wp-content/themes/cork-gulp
-# RUN gulp build
+# Add image configuration and scripts
+ADD run.sh /run.sh
+RUN chmod 755 /*.sh
+
+## Add Permalinks
+RUN a2enmod rewrite
+ADD wordpress.conf /etc/apache2/sites-enabled/000-default.conf
+
+# Add application code onbuild
+ONBUILD RUN chown www-data:www-data /app -R
 
 EXPOSE 80
+WORKDIR /
+CMD ["/run.sh"]
