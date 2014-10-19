@@ -14,8 +14,8 @@ RUN apt-get -yq install curl git software-properties-common wget
 
 # APACHE
 RUN apt-get -yq install apache2
-        
-# PHP 
+
+# PHP
 RUN apt-get -yq install libapache2-mod-php5 php5-mysql php5-gd php5-curl php-pear php-apc
 
 # Ruby
@@ -26,7 +26,7 @@ RUN add-apt-repository ppa:chris-lea/node.js && apt-get update
 RUN apt-get -yq install nodejs
 
 # MySQL
-RUN apt-get -yq install mysql-client 
+RUN apt-get -yq install mysql-client
 
 # Compass
 RUN gem install rubygems-update
@@ -65,13 +65,22 @@ RUN echo "define( 'WP_DEBUG', true);" >> /app/wp/wp-config.php
 RUN echo "\n/** SET SITE URL **/" >> /app/wp/wp-config.php
 RUN echo "define( 'WP_SITEURL', 'http://' . \$_SERVER['HTTP_HOST'] . '/wp' ); " >> /app/wp/wp-config.php
 RUN echo "define( 'WP_HOME', 'http://' . \$_SERVER['HTTP_HOST'] );" >> /app/wp/wp-config.php
-RUN if ! $(wp core is-installed --allow-root); then wp core install --allow-root --title='Some Title' --admin_user='admin' --admin_password='admin' --admin_email='jorge.silva@thejsj.com' --url='dockerhost' ; fi
+RUN if ! $(wp core is-installed --allow-root); \
+    then wp core install \
+    --allow-root \
+    --title='Some Title' \
+    --admin_user='admin' \
+    --admin_password='admin' \
+    --admin_email='jorge.silva@thejsj.com' \
+    --url='dockerhost' ; \
+    fi
 
 ## Install & Activate Plugins
 WORKDIR /app/wp
 RUN wp plugin install advanced-custom-fields --activate --allow-root
 RUN wp plugin install regenerate-thumbnails --activate --allow-root
 RUN wp plugin install wp-migrate-db --activate --allow-root
+RUN wp plugin install wp-super-cache --activate --allow-root
 RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-gallery.zip --activate --allow-root
 RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-options-page.zip --activate --allow-root
 RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-repeater.zip --activate --allow-root
@@ -91,6 +100,10 @@ ADD cork-gulp /app/wp/wp-content/themes/cork-gulp
 WORKDIR /app/wp/wp-content/themes
 RUN wp theme activate cork-gulp --allow-root
 
+# Add Uploads Directory
+RUN mkdir -p /app/wp/wp-content/uploads/
+RUN chmod -R 777 /app/wp/wp-content
+
 # Install npm packages
 WORKDIR /app/wp/wp-content/themes/cork-gulp
 RUN npm install
@@ -108,8 +121,15 @@ RUN chmod 755 /*.sh
 RUN a2enmod rewrite
 ADD wordpress.conf /etc/apache2/sites-enabled/000-default.conf
 
+# Make Uploads a persistent volume, who's files won't be deleted
+RUN rm -rf /app/wp/wp-content/uploads
+RUN ln -s /uploads /app/wp/wp-content
+
 # Add application code onbuild
+ONBUILD RUN chmod -R 777 /app/wp/wp-content
 ONBUILD RUN chown www-data:www-data /app -R
+ONBUILD RUN chmod -R 777 /uploads
+ONBUILD RUN chown -R www-data:www-data /uploads
 
 EXPOSE 80
 WORKDIR /
