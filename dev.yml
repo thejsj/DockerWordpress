@@ -1,0 +1,14 @@
+uploads:
+  build: ./uploads
+  volumes:
+   - "/uploads"
+wp:
+  build: .
+  command:
+   - "/run.sh"
+  ports:
+   - "80:80"
+  expose:
+   - "80"
+  volumes_from:
+   - "uploads"
