@@ -1,0 +1,4 @@
+FROM tutum/mysql:5.5
+MAINTAINER CO+LAB Multimedia
+
+EXPOSE 3306

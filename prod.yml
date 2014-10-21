@@ -2,6 +2,10 @@ uploads:
   build: ./uploads
   volumes:
    - "/uploads"
+wpdb:
+  build: ./mysql
+  environment:
+    MYSQL_PASS: "6gdP7R3adDYNehj"
 wp:
   build: .
   command:
@@ -12,8 +16,9 @@ wp:
    - "80"
   volumes_from:
    - "uploads"
+  links:
+   - "wpdb:wpdb"
   environment:
-    DB_HOST: 10.0.2.2
-    DB_NAME: wp_test
-    DB_USER: wp_test
-    DB_PASS: wp_test
+    - DB_NAME=wp_test
+    - DB_USER=admin
+    - DB_PASS=6gdP7R3adDYNehj
