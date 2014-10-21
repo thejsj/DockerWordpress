@@ -1,4 +1,4 @@
-## Install & Activate Plugins
+## Activate Plugins
 cd /app/wp/
 wp plugin activate advanced-custom-fields --allow-root
 wp plugin activate regenerate-thumbnails --allow-root

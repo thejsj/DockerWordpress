@@ -56,31 +56,8 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-# Install WordPress
+## Install WordPress
 RUN wp core download --allow-root --path='/app/wp/'
-
-# Add Config
-WORKDIR /app/wp
-# We're only adding this for
-RUN wp core config \
-    --allow-root \
-    --dbname="wp_test" \
-    --dbuser="root" \
-    --dbhost="10.0.2.2" \
-    --skip-check
-
-## Install install_plugins_and_themes## Install & Activate Plugins
-WORKDIR /app/wp/
-RUN wp plugin install advanced-custom-fields --allow-root
-RUN wp plugin install regenerate-thumbnails --allow-root
-RUN wp plugin install wp-migrate-db --allow-root
-RUN wp plugin install wp-super-cache --allow-root
-RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-gallery.zip --allow-root
-RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-options-page.zip --allow-root
-RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-repeater.zip --allow-root
-RUN wp plugin install http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/gravityforms_1.8.9.12.zip --allow-root
-RUN wp plugin uninstall hello --allow-root
-RUN wp plugin uninstall akismet --allow-root
 
 ## Add Files
 WORKDIR /
@@ -88,18 +65,26 @@ ADD wp/index.php /app/
 ADD wp/.htaccess /app/
 RUN chmod 644 /app/.htaccess
 
-# Install Theme
-WORKDIR /
-ADD theme /app/wp/wp-content/themes/cork-gulp
-
 # Add Uploads Directory
 RUN mkdir -p /app/wp/wp-content/uploads/
 RUN chmod -R 777 /app/wp/wp-content
 
-# Install npm packages
-WORKDIR /app/wp/wp-content/themes/cork-gulp
-RUN npm install
-RUN gulp build
+## Install Composer and Install Plugins
+WORKDIR /app/wp/
+RUN curl -sS https://getcomposer.org/installer | php
+ADD wp/composer.json /app/wp/composer.json
+RUN rm -rf /app/wp/wp-content/plugins
+RUN mkdir -p /app/wp/wp-content/plugins
+RUN export COMPOSER_HOME=/ && composer install
+
+# Install Theme
+WORKDIR /
+ADD theme /app/wp/wp-content/themes/cork-gulp
+
+# # Install npm packages
+# WORKDIR /app/wp/wp-content/themes/cork-gulp
+# RUN npm install
+# RUN gulp build
 
 #
 # Apache/PHP
@@ -108,7 +93,8 @@ RUN gulp build
 # Add image configuration and scripts
 ADD wp/run.sh /run.sh
 ADD wp/install_wp.sh /install_wp.sh
-ADD wp/install_plugins_and_themes.sh /install_plugins_and_themes.sh
+ADD wp/activate_plugins_and_themes.sh /activate_plugins_and_themes.sh
+ADD wp/install_plugins.sh /install_plugins.sh
 RUN chmod 755 /*.sh
 
 ## Add Permalinks

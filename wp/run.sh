@@ -30,7 +30,7 @@ echo "define( 'WP_HOME', 'http://' . \$_SERVER['HTTP_HOST'] );" >> /app/wp/wp-co
 source /install_wp.sh
 
 # Install Plugins and Themes
-source /install_plugins_and_themes.sh
+source /activate_plugins_and_themes.sh
 
 # Apache
 cd /

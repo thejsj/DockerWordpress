@@ -1,0 +1,57 @@
+{
+    "require": {
+        "wpackagist/advanced-custom-fields": "4.2.*",
+        "wpackagist/regenerate-thumbnails": "2.2.4",
+        "wpackagist/wp-migrate-db": "0.6",
+        "wpackagist/wp-super-cache": "1.4.2",
+        "colab/acf-repeater": "1.0.0",
+        "colab/acf-gallery": "1.0.0",
+        "colab/gravityforms": "1.0.0",
+        "colab/acf-options-page": "1.0.0"
+    },
+    "repositories": [{
+        "type": "composer",
+        "url": "http://wpackagist.org"
+    }, {
+        "type": "package",
+        "package": {
+            "name": "colab/acf-gallery",
+            "version": "1.0.0",
+            "dist": {
+                "url": "http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-gallery.zip",
+                "type": "zip"
+            }
+        }
+    }, {
+        "type": "package",
+        "package": {
+            "name": "colab/acf-repeater",
+            "version": "1.0.0",
+            "dist": {
+                "url": "http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-repeater.zip",
+                "type": "zip"
+            }
+        }
+    }, {
+        "type": "package",
+        "package": {
+            "name": "colab/acf-options-page",
+            "version": "1.0.0",
+            "dist": {
+                "url": "http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/acf-options-page.zip",
+                "type": "zip"
+            }
+        }
+    }, {
+        "type": "package",
+        "package": {
+            "name": "colab/gravityforms",
+            "version": "1.0.0",
+            "dist": {
+                "url": "http://www.colab-plugin-repository.com.php54-3.ord1-1.websitetestlink.com/plugins/gravityforms_1.8.9.12.zip",
+                "type": "zip"
+            }
+        }
+    }],
+    "minimum-stability": "dev"
+}
