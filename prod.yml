@@ -4,6 +4,8 @@ uploads:
    - "/uploads"
 wpdb:
   build: ./mysql
+  ports:
+   - "3306:3306"
   environment:
     MYSQL_PASS: "6gdP7R3adDYNehj"
 wp:

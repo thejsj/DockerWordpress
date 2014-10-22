@@ -81,10 +81,10 @@ RUN export COMPOSER_HOME=/ && composer install
 WORKDIR /
 ADD theme /app/wp/wp-content/themes/cork-gulp
 
-# # Install npm packages
-# WORKDIR /app/wp/wp-content/themes/cork-gulp
-# RUN npm install
-# RUN gulp build
+# Install npm packages
+WORKDIR /app/wp/wp-content/themes/cork-gulp
+RUN npm install
+RUN gulp build
 
 #
 # Apache/PHP
@@ -95,9 +95,10 @@ ADD wp/run.sh /run.sh
 ADD wp/install_wp.sh /install_wp.sh
 ADD wp/activate_plugins_and_themes.sh /activate_plugins_and_themes.sh
 ADD wp/install_plugins.sh /install_plugins.sh
+ADD wp/create_db.sh /create_db.sh
 RUN chmod 755 /*.sh
 
-## Add Permalinks
+## Add Domain configuration
 RUN a2enmod rewrite
 ADD wp/wordpress.conf /etc/apache2/sites-enabled/000-default.conf
 

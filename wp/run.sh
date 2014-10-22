@@ -6,7 +6,10 @@ if [ -z "${DB_HOST}" ]; then
 fi;
 
 date -d @`date +%s` "+%T on %m/%d, %Y." >> /db.txt
-echo "Current DB Details : ${DB_NAME} -- ${DB_USER} -- ${DB_HOST} -- ${DB_PASS}" >> /db.txt
+echo "Current DB Details : ${DB_NAME} -- ${DB_USER} -- ${DB_HOST} -- ${DB_PASS} / ${WPDB_PORT_3306_TCP_ADDR}" >> /db.txt
+
+# Create DB if it doesn't exists
+source /create_db.sh
 
 # Add Config File
 cd /app/wp/
@@ -16,8 +19,7 @@ wp core config \
     --dbname="${DB_NAME}" \
     --dbuser="${DB_USER}" \
     --dbhost="${DB_HOST}" \
-    --dbpass="${DB_PASS}" \
-    --skip-check
+    --dbpass="${DB_PASS}"
 echo "" >> /app/wp/wp-config.php
 echo "/** ENABLE DEBUGGING **/" >> /app/wp/wp-config.php
 echo "define( 'WP_DEBUG', true);" >> /app/wp/wp-config.php
