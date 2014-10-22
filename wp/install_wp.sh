@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Install DB
 cd /app/wp/
 if ! $(wp core is-installed --allow-root); then \

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## Install Plugins
 cd /app/wp/
 wp plugin install advanced-custom-fields --allow-root

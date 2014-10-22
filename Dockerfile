@@ -91,11 +91,13 @@ RUN gulp build
 #
 
 # Add image configuration and scripts
+ADD wp/init.sh /init.sh
 ADD wp/run.sh /run.sh
 ADD wp/install_wp.sh /install_wp.sh
 ADD wp/activate_plugins_and_themes.sh /activate_plugins_and_themes.sh
 ADD wp/install_plugins.sh /install_plugins.sh
 ADD wp/create_db.sh /create_db.sh
+ADD wp/create_wp_config.sh /create_wp_config.sh
 RUN chmod 755 /*.sh
 
 ## Add Domain configuration
@@ -118,4 +120,4 @@ ONBUILD RUN chown -R www-data:www-data /uploads
 
 EXPOSE 80
 WORKDIR /
-ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["/init.sh"]
