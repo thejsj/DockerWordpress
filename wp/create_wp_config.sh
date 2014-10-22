@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "wp core config \
+    --allow-root \
+    --dbname=${DB_NAME} \
+    --dbuser=${DB_USER} \
+    --dbhost=${DB_HOST} \
+    --dbpass=${DB_PASS}" >> /config-command.txt
+
 cd /app/wp/
 rm wp-config.php
 wp core config \
